@@ -1,0 +1,411 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+     KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="format-detection" content="telephone=no" />
+    <!-- WARNING: for iOS 7, remove the width=device-width and height=device-height attributes. See https://issues.apache.org/jira/browse/CB-4323 -->
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
+    <link rel="stylesheet" type="text/css" href="css/index.css" />
+    <title>iPark</title>
+    <style type="text/css">
+        .centered {
+            position: fixed;
+            top: 50%;
+            margin-top: -230px;
+        }
+    </style>
+    <script type="text/javascript" src="js/zepto.js"></script>
+    <script type="text/javascript" src="js/Media.js"></script>
+    <script src="js/jquery-1.11.1.min.js" type="text/javascript"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('.Group1').on('touchstart', function (e) {
+                $(this).addClass('tapped');
+            });
+
+            $('.Group1').on('touchend', function (e) {
+                $(this).removeClass('tapped');
+            });
+
+            $('.Group1').on('tap', function (e) {
+                e.preventDefault();
+                turnOnBtn(this, 1)
+                return false;
+            });
+        });
+
+
+        String.prototype.endsWith = function (suffix) {
+            return this.indexOf(suffix, this.length - suffix.length) !== -1;
+        };
+
+        var isOn = false;
+        var startCount = false;
+        var timer;
+        var tmrCounter;
+        var h = 0, m = 0, s = 0;
+        var media = null;
+
+        function turnOnBtn(imgCtrl, groupId) {
+            //playClickSound();
+            switch (groupId) {
+                case 0:
+                    isOn = !isOn;
+                    if (isOn) {
+                        $("#tblCounter").show();
+                        startDDTimer();
+                    }
+                    else {
+                        window.clearInterval(tmrCounter);
+                        tmrCounter = null;
+                        startCount = false;
+                        s = m = h = 0;
+                        setPic($("#imgs1"), $("#imgs2"), s);;
+                        setPic($("#imgm1"), $("#imgm2"), m);
+                        setPic($("#imgh1"), $("#imgh2"), h);
+                        $("#tblCounter").hide();
+                        window.clearInterval(timer);
+                        timer = null;
+
+                        if (confirm("Do you Want to Exit ?")) {
+                            navigator.app.exitApp();
+                        }
+                    }
+                    break;
+                case 1:
+                    if (imgCtrl.src.endsWith("B_6_1.png") && !startCount) {
+                        startStopCounter(true);
+                    }
+                    else if (imgCtrl.src.endsWith("B_1_1.png") && startCount) {
+                        startStopCounter(false);
+                    }
+
+                    $(".Group1").each(function () {
+                        this.src = this.src.replace("%20-%20on.png", ".png");
+                    });
+
+                    break;
+                case 2:
+                    $(".Group2").each(function () {
+                        this.src = this.src.replace("%20-%20on.png", ".png");
+                    });
+                    break;
+                case 3:
+                    $(".Group3").each(function () {
+                        this.src = this.src.replace("%20-%20on.png", ".png");
+                    });
+                    break;
+            }
+
+            if (isOn || groupId == 0) {
+                if (imgCtrl.src.endsWith("%20-%20on.png")) {
+                    imgCtrl.src = imgCtrl.src.replace("%20-%20on.png", ".png");
+                    $(".Group1, .Group2, .Group3").each(function () {
+                        this.src = this.src.replace("%20-%20on.png", ".png");
+                    });
+                }
+                else {
+                    imgCtrl.src = imgCtrl.src.replace(".png", "%20-%20on.png");
+                }
+            }
+        }
+
+        function startDDTimer() {
+            timer = setInterval(function () {
+                if ($("#imgdd1, #imgdd2").css('display') == 'none') {
+                    $("#imgdd1, #imgdd2").show();
+                }
+                else {
+                    $("#imgdd1, #imgdd2").hide();
+                }
+            }, 500);
+        }
+
+        function startStopCounter(isStart) {
+            if (startCount == isStart)
+                return;
+
+            startCount = isStart;
+            if (isStart) {
+                s = m = h = 0;
+                tmrCounter = setInterval(function () {
+                    s = s + 1;
+                    if (s == 60) {
+                        s = 0;
+                        m = m + 1
+                        if (m == 60) {
+                            m = 0;
+                            h = h + 1;
+                        }
+                    }
+
+                    setPic($("#imgs1"), $("#imgs2"), s);;
+                    setPic($("#imgm1"), $("#imgm2"), m);
+                    setPic($("#imgh1"), $("#imgh2"), h);
+                }, 10);
+            }
+            else {
+                window.clearInterval(tmrCounter);
+                tmrCounter = null;
+            }
+        }
+
+        function clearGroup(groupID) {
+            playClickSound();
+            $(".Group" + groupID).each(function () {
+                this.src = this.src.replace("%20-%20on.png", ".png");
+            });
+        }
+
+        function setPic(imgCtrl1, imgCtrl2, number) {
+            if (number < 10) {
+                imgCtrl1.attr("src", "img/digits/" + number.toString() + ".png");
+                imgCtrl2.attr("src", "img/digits/0.png");
+            }
+            else if (number >= 10 && number < 20) {
+                imgCtrl1.attr("src", "img/digits/" + (number - 10).toString() + ".png");
+                imgCtrl2.attr("src", "img/digits/1.png");
+            }
+            else if (number >= 20 && number < 30) {
+                imgCtrl1.attr("src", "img/digits/" + (number - 20).toString() + ".png");
+                imgCtrl2.attr("src", "img/digits/2.png");
+            }
+            else if (number >= 30 && number < 40) {
+                imgCtrl1.attr("src", "img/digits/" + (number - 30).toString() + ".png");
+                imgCtrl2.attr("src", "img/digits/3.png");
+            }
+            else if (number >= 40 && number < 50) {
+                imgCtrl1.attr("src", "img/digits/" + (number - 40).toString() + ".png");
+                imgCtrl2.attr("src", "img/digits/4.png");
+            }
+            else if (number >= 50 && number < 60) {
+                imgCtrl1.attr("src", "img/digits/" + (number - 50).toString() + ".png");
+                imgCtrl2.attr("src", "img/digits/5.png");
+            }
+        }
+
+        function onLoad() {
+            document.addEventListener("deviceready", onDeviceReady, true);
+        }
+
+        //function doPlay(soundId) {
+        //    var my_media = new Media("/android_asset/www/" + soundId + ".mp3",
+        //      function () {
+        //          navigator.notification.alert('Success!', alertDismissed);
+        //      },
+        //      function (err) {
+        //          navigator.notification.alert('Error!', alertDismissed);
+        //      });
+        //    my_media.play();
+        //}
+
+        function fnMove(dir) {
+            playClickSound();
+        }
+
+        function playClickSound() {
+            try {
+                if (media == null) {alert('1');
+                    media = new Media("res/clk.mp3", onSuccess, onFail);
+                }
+                alert('2');
+                media.play();
+            }
+            catch (err) {
+                alert(err.message);
+            }
+        }
+
+        function onSuccess()
+        { alert('succ'); }
+        function onFail(err)
+        { alert('fail'); }
+
+    </script>
+</head>
+<body onload="onLoad()">
+    <table cellspacing="0" cellpadding="0" border="0" style="width: 100%">
+        <tr>
+            <td>
+                <table cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                        <td>
+                            <img src="img/A_1_1.png" width="111px" height="56px"></td>
+                        <td style="height: 56px; width: 70%; background-image: url('img/A_4_1.png')"></td>
+                        <td>
+                            <img src="img/A_3_1.png" width="178px" height="56px"></td>
+                        <td style="height: 56px; width: 305%; background-image: url('img/A_4_1.png')"></td>
+                        <td>
+                            <img src="img/A_5_1.png" width="111px" height="56px" onclick="turnOnBtn(this, 0)" style="cursor: pointer"></td>
+                        <td>
+                            <img src="img/A_6_1.png" width="70px"
+                                height="56px">
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <table cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                        <td>
+                            <img src="img/B_1_1.png" width="53px" height="207px" class="Group1" style="cursor: pointer;" alt="" /></td>
+                        <td>
+                            <img src="img/B_2_1.png" width="106px" height="207px" alt="" /></td>
+                        <td style="height: 207px; width: 100%; background-image: url('img/B_3_1.png')"></td>
+                        <td>
+                            <img src="img/B_5_1.png" width="106px" height="207px" alt="" /></td>
+                        <td>
+                            <img src="img/B_6_1.png" width="64px" height="207px" class="Group1" style="cursor: pointer;" alt="" /></td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <table cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                        <td style="height: 26px;">
+                            <img src="img/C_1_1.png" width="42" height="26"></td>
+                        <td style="height: 26px;">
+                            <img src="img/C_2_1.png" width="59"
+                                height="26" alt="" /></td>
+                        <td style="height: 26px;">
+                            <img src="img/C_3_1.png" width="8" height="26"></td>
+                        <td style="height: 26px;">
+                            <img src="img/C_4_1.png" width="61"
+                                height="26"></td>
+                        <td style="height: 26px;">
+                            <img src="img/C_5_1.png" width="28" height="26"></td>
+                        <td style="background-image: url('img/C_6_1.png'); width: 100%; height: 26px;"></td>
+                        <td style="height: 26px;">
+                            <img src="img/C_7_1.png" width="31" height="26"></td>
+                        <td style="height: 26px;">
+                            <img src="img/C_8_1.png" width="63"
+                                height="26"></td>
+                        <td style="height: 26px;">
+                            <img src="img/C_12_1.png" width="63"
+                                height="26"></td>
+                        <td style="height: 26px;">
+                            <img src="img/C_13_1.png" width="56" height="26"></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <img src="img/C_1_2.png" width="42" height="62"></td>
+                        <td>
+                            <img src="img/C_2_2.png" width="59" style="cursor: pointer;" class="Group3" onclick="fnMove(1)" height="62"></td>
+                        <td>
+                            <img src="img/C_3_2.png" width="8" height="62"></td>
+                        <td>
+                            <img src="img/C_4_2.png" width="61" style="cursor: pointer;" class="Group3" onclick="fnMove(0)" height="62"></td>
+                        <td>
+                            <img src="img/C_5_2.png" width="28" height="62"></td>
+                        <td rowspan="2" style="background-color: #7DA16B; width: 100%;">
+                            <center>
+                                <table id="tblCounter" style="display: none;">
+                                    <tr>
+                                        <td>
+                                            <img src="img/digits/0.png" width="30" alt="" id="imgh2" /></td>
+                                        <td>
+                                            <img src="img/digits/0.png" width="30" alt="" id="imgh1" /></td>
+                                        <td style="width: 40px">
+                                            <img src="img/digits/dd.png" width="30" alt="" id="imgdd1" /></td>
+                                        <td>
+                                            <img src="img/digits/0.png" width="30" alt="" id="imgm2" /></td>
+                                        <td>
+                                            <img src="img/digits/0.png" width="30" alt="" id="imgm1" /></td>
+                                        <td style="width: 40px">
+                                            <img src="img/digits/dd.png" width="30" alt="" id="imgdd2" /></td>
+                                        <td>
+                                            <img src="img/digits/0.png" width="30" alt="" id="imgs2" /></td>
+                                        <td>
+                                            <img id="imgs1" src="img/digits/0.png" width="30" alt="" /></td>
+                                    </tr>
+                                </table>
+                            </center>
+
+
+                        </td>
+                        <td rowspan="2" style="background-image: url('img/C_7_2.png')"></td>
+                        <td>
+                            <img src="img/C_8_2.png" width="63" style="cursor: pointer;" height="62" class="Group2" onclick="turnOnBtn(this,2)"></td>
+                        <td>
+                            <img src="img/C_12_2.png" width="63" style="cursor: pointer;" height="62" class="Group2" onclick="turnOnBtn(this,2)"></td>
+                        <td>
+                            <img src="img/C_13_2.png" width="56" height="62"></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <img src="img/C_1_3.png" width="42" height="61"></td>
+                        <td>
+                            <img src="img/C_2_3.png" width="59" style="cursor: pointer;" class="Group3" onclick="fnMove(3)" height="61"></td>
+                        <td>
+                            <img src="img/C_3_3.png" width="8" height="61"></td>
+                        <td>
+                            <img src="img/C_4_3.png" width="61" style="cursor: pointer;" class="Group3" onclick="fnMove(2)" height="61"></td>
+                        <td>
+                            <img src="img/C_5_3.png" width="28" height="61"></td>
+                        <td>
+                            <img src="img/C_8_3.png" width="63" style="cursor: pointer;" class="Group2" height="61" onclick="turnOnBtn(this,2)"></td>
+                        <td>
+                            <img src="img/C_12_3.png" width="63" style="cursor: pointer;" class="Group2" height="61" onclick="clearGroup(2)"></td>
+                        <td>
+                            <img src="img/C_13_3.png" width="56" height="61"></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <img src="img/C_1_4.png" width="42" height="56"></td>
+                        <td>
+                            <img src="img/C_2_4.png" width="59"
+                                height="56"></td>
+                        <td>
+                            <img src="img/C_3_4.png" width="8" height="56"></td>
+                        <td>
+                            <img src="img/C_4_4.png" width="61"
+                                height="56"></td>
+                        <td>
+                            <img src="img/C_5_4.png" width="28" height="56"></td>
+                        <td style="width: 100%; background-image: url('img/C_6_4.png'); height: 56px"></td>
+                        <td>
+                            <img src="img/C_7_4.png" width="31" height="56"></td>
+                        <td>
+                            <img src="img/C_8_4.png" width="63"
+                                height="56"></td>
+                        <td>
+                            <img src="img/C_12_4.png" width="63"
+                                height="56"></td>
+                        <td>
+                            <img src="img/C_13_4.png" width="56" height="56"></td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+    <!-- <script type="text/javascript" src="phonegap.js"></script>-->
+    <script type="text/javascript" src="js/index.js"></script>
+    <script type="text/javascript">
+        app.initialize();
+    </script>
+</body>
+</html>
